@@ -1,0 +1,205 @@
+<title>Analyst Job Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+/* Layout: one working column — header + tally strip, filter bar, dense table, collapsed "filtered out" drawer */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#1b2130; --muted:#5d6577; --line:#dde1e8; --accent:#2d4fc4; --accent-soft:#e6ebfb;
+  --hi:#17794a; --hi-bg:#dff3e8; --md:#8a5a00; --md-bg:#fbefd2; --lo:#5d6577; --lo-bg:#eceef2;
+  --warn:#a3361b; --warn-bg:#fbe4dc;
+  --f-display:"Fraunces",Georgia,serif; --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151c; --surface:#1a1e28; --fg:#e4e7ee; --muted:#9aa2b4; --line:#2c3240; --accent:#8ea6ff; --accent-soft:#232c4a;
+  --hi:#6fd6a0; --hi-bg:#163527; --md:#f0c56b; --md-bg:#3a2e12; --lo:#a7aebd; --lo-bg:#272c37; --warn:#ff9c80; --warn-bg:#3d1f17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151c; --surface:#1a1e28; --fg:#e4e7ee; --muted:#9aa2b4; --line:#2c3240; --accent:#8ea6ff; --accent-soft:#232c4a;
+  --hi:#6fd6a0; --hi-bg:#163527; --md:#f0c56b; --md-bg:#3a2e12; --lo:#a7aebd; --lo-bg:#272c37; --warn:#ff9c80; --warn-bg:#3d1f17; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:16px;padding-block:28px 48px;display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(24px,3vw,32px);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.tally{display:flex;flex-wrap:wrap;gap:8px}
+.tally span{font-family:var(--f-mono);font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-variant-numeric:tabular-nums}
+.tally b{font-weight:500}
+.filters{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.fgroup{display:grid;gap:6px;min-width:0}
+.fgroup>label,.fgroup>.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+select{font:inherit;font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);max-width:100%}
+.chip:focus-visible,select:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.reset{margin-left:auto;font:inherit;font-size:13px;background:none;border:0;color:var(--accent);cursor:pointer;padding:6px 0}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:1100px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;background:var(--surface);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.num,td .mono{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fit{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;text-transform:capitalize}
+.fit.high{color:var(--hi);background:var(--hi-bg)} .fit.medium{color:var(--md);background:var(--md-bg)} .fit.low{color:var(--lo);background:var(--lo-bg)}
+.title{font-weight:600}
+.flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.flag{font-size:11.5px;padding:1px 7px;border-radius:4px;background:var(--warn-bg);color:var(--warn)}
+.flag.info{background:var(--lo-bg);color:var(--muted)}
+.new-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:middle}
+.muted{color:var(--muted)}
+a.link{color:var(--accent);text-decoration:none;font-weight:500;white-space:nowrap}
+a.link:hover{text-decoration:underline}
+.status{min-width:118px}
+.status[data-v="interested"]{border-color:var(--accent);color:var(--accent)}
+.status[data-v="applied"]{border-color:var(--hi);color:var(--hi)}
+.status[data-v="interview"]{border-color:var(--md);color:var(--md);font-weight:600}
+.status[data-v="rejected"]{color:var(--muted);text-decoration:line-through}
+.status[data-v="not_interested"]{color:var(--muted)}
+tr.dim td{opacity:.6}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+summary{cursor:pointer;font-weight:600}
+.out{display:grid;gap:8px;margin-top:12px}
+.out div{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+.out .why{color:var(--warn)}
+.note{font-size:12.5px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px}
+@media (prefers-reduced-motion:no-preference){.toast{transition:opacity .2s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Analyst Job Board</h1>
+      <p class="sub">Fresher Data Analyst, Business Analyst and BI roles in India and remote. New jobs are added every weekday at 9 AM.</p>
+    </div>
+    <div class="tally" id="tally"></div>
+  </header>
+
+  <section class="filters" aria-label="Filters">
+    <div class="fgroup"><span class="lbl">Fit</span>
+      <div class="chips" id="fitChips">
+        <button class="chip" data-fit="high" aria-pressed="true">High</button>
+        <button class="chip" data-fit="medium" aria-pressed="true">Medium</button>
+        <button class="chip" data-fit="low" aria-pressed="true">Low</button>
+      </div>
+    </div>
+    <div class="fgroup"><label for="city">City</label><select id="city"><option value="">All cities</option></select></div>
+    <div class="fgroup"><label for="posted">Posted</label>
+      <select id="posted"><option value="">Any time</option><option value="1">Today</option><option value="3">Last 3 days</option><option value="7">Last 7 days</option><option value="14">Last 14 days</option></select></div>
+    <div class="fgroup"><label for="added">Added to board</label>
+      <select id="added"><option value="">Any time</option><option value="1">Today</option><option value="7">Last 7 days</option></select></div>
+    <div class="fgroup"><label for="statusF">Status</label>
+      <select id="statusF"><option value="">All statuses</option><option value="new">New</option><option value="interested">Interested</option><option value="applied">Applied</option><option value="interview">Interview</option><option value="rejected">Rejected</option><option value="not_interested">Not interested</option></select></div>
+    <div class="fgroup"><label for="sort">Sort</label>
+      <select id="sort"><option value="fit">Fit, then newest</option><option value="posted">Newest posted</option><option value="added">Recently added</option></select></div>
+    <button class="reset" id="reset">Clear filters</button>
+  </section>
+
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Fit</th><th>Title</th><th>Company</th><th>Location</th><th>Experience asked</th><th>Posted</th><th>Deadline</th><th>Apply</th><th>Recruiters</th><th>Status</th></tr></thead>
+      <tbody id="rows"><tr><td colspan="10" class="empty" id="emptyMsg">Loading jobs… The daily scan adds roles here; once rows appear, set each one's status from the last column.</td></tr></tbody>
+    </table>
+  </div>
+
+  <details id="outBox" hidden>
+    <summary id="outSum">Filtered out</summary>
+    <p class="note">Removed by your rules (3+ years asked, company already applied to, or a payment request). Kept here so nothing disappears without a reason.</p>
+    <div class="out" id="outList"></div>
+  </details>
+
+  <p class="note">Fit comes from the scraper's quick check, not a full evaluation. Red tags are cautions to read before applying. Recruiter links open a LinkedIn people search; nothing is looked up automatically.</p>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const STATUSES=[["new","New"],["interested","Interested"],["applied","Applied"],["rejected","Rejected"],["interview","Interview"],["not_interested","Not interested"]];
+  const FIT_RANK={high:0,medium:1,low:2};
+  let jobs=[], db=null, canWrite=true;
+  const st={fit:new Set(["high","medium","low"]),city:"",posted:"",added:"",status:"",sort:"fit"};
+  try{const s=JSON.parse(localStorage.getItem("jobboard-filters")||"null");if(s){st.fit=new Set(s.fit);Object.assign(st,{city:s.city,posted:s.posted,added:s.added,status:s.status,sort:s.sort||"fit"})}}catch(e){}
+  const save=()=>{try{localStorage.setItem("jobboard-filters",JSON.stringify({...st,fit:[...st.fit]}))}catch(e){}};
+
+  const today=new Date(); today.setHours(0,0,0,0);
+  const daysAgo=d=>{if(!d)return Infinity;const t=new Date(d+"T00:00:00");return Math.round((today-t)/864e5)};
+  const fmt=d=>{if(!d)return "—";const t=new Date(d+"T00:00:00");return t.toLocaleDateString("en-IN",{day:"numeric",month:"short"})};
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const safeUrl=u=>/^https:\/\//i.test(u||"")?u:"#";
+  const recruiter=j=>"https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent((j.company_search||j.company)+" recruiter")+"&origin=GLOBAL_SEARCH_HEADER";
+  const toast=m=>{const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,1800)};
+
+  function syncControls(){
+    document.querySelectorAll("#fitChips .chip").forEach(b=>b.setAttribute("aria-pressed",st.fit.has(b.dataset.fit)));
+    $("#posted").value=st.posted;$("#added").value=st.added;$("#statusF").value=st.status;$("#sort").value=st.sort;
+    const cities=[...new Set(jobs.filter(j=>!j.excluded).map(j=>j.city).filter(Boolean))].sort((a,b)=>a==="Remote"?-1:b==="Remote"?1:a.localeCompare(b));
+    $("#city").innerHTML='<option value="">All cities</option>'+cities.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+    $("#city").value=cities.includes(st.city)?st.city:"";
+  }
+
+  function render(){
+    const live=jobs.filter(j=>!j.excluded), out=jobs.filter(j=>j.excluded);
+    const c=k=>live.filter(j=>(j.status||"new")===k).length;
+    $("#tally").innerHTML=jobs.length?[
+      `<span><b>${live.length}</b> open roles</span>`,
+      `<span><b>${live.filter(j=>j.fit==="high").length}</b> high fit</span>`,
+      `<span><b>${live.filter(j=>daysAgo(j.first_seen)===0).length}</b> added today</span>`,
+      `<span><b>${c("applied")}</b> applied</span>`,
+      `<span><b>${c("interview")}</b> interview</span>`].join(""):"";
+
+    let rows=live.filter(j=>st.fit.has(j.fit)
+      &&(!st.city||j.city===st.city)
+      &&(!st.posted||daysAgo(j.posted_date)<+st.posted)
+      &&(!st.added||daysAgo(j.first_seen)<+st.added)
+      &&(!st.status||(j.status||"new")===st.status));
+    const byDate=(a,b,k)=>(b[k]||"").localeCompare(a[k]||"");
+    rows.sort((a,b)=>st.sort==="posted"?byDate(a,b,"posted_date"):st.sort==="added"?byDate(a,b,"first_seen")||byDate(a,b,"posted_date"):(FIT_RANK[a.fit]-FIT_RANK[b.fit])||byDate(a,b,"posted_date"));
+
+    const tb=$("#rows");
+    if(!jobs.length){tb.innerHTML=`<tr><td colspan="10" class="empty">${db?"No jobs yet. The weekday 9 AM scan adds new roles here.":"Jobs live in this board's shared storage, which isn't available in this view. Open the board on claude.ai while signed in to see them."}</td></tr>`;}
+    else if(!rows.length){tb.innerHTML=`<tr><td colspan="10" class="empty">No jobs match these filters. Clear filters to see all ${live.length}.</td></tr>`;}
+    else tb.innerHTML=rows.map(j=>{
+      const s=j.status||"new";
+      const flags=(j.flags||[]).map(f=>`<span class="flag">${esc(f)}</span>`).concat((j.notes||[]).map(f=>`<span class="flag info">${esc(f)}</span>`)).join("");
+      const fresh=daysAgo(j.first_seen)===0?'<span class="new-dot" title="Added today"></span>':"";
+      const dl=j.deadline?`<span class="mono">${fmt(j.deadline)}</span>`:'<span class="muted">Not stated</span>';
+      return `<tr class="${s==="rejected"||s==="not_interested"?"dim":""}">
+        <td><span class="fit ${esc(j.fit)}">${esc(j.fit)}</span></td>
+        <td><div class="title">${fresh}${esc(j.title)}</div>${flags?`<div class="flags">${flags}</div>`:""}</td>
+        <td>${esc(j.company)}</td>
+        <td>${esc(j.location)}</td>
+        <td>${esc(j.experience||"Not stated")}</td>
+        <td class="num">${fmt(j.posted_date)}</td>
+        <td>${dl}</td>
+        <td><a class="link" href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">Apply ↗</a></td>
+        <td><a class="link" href="${esc(recruiter(j))}" target="_blank" rel="noopener">Find recruiters ↗</a></td>
+        <td><select class="status" id="st-${esc(j.id)}" data-id="${esc(j.id)}" data-v="${s}" ${canWrite&&db?"":"disabled"} aria-label="Status for ${esc(j.title)} at ${esc(j.company)}">${STATUSES.map(([v,l])=>`<option value="${v}"${v===s?" selected":""}>${l}</option>`).join("")}</select></td>
+      </tr>`}).join("");
+
+    $("#outBox").hidden=!out.length;
+    $("#outSum").textContent=`Filtered out by your rules (${out.length})`;
+    $("#outList").innerHTML=out.map(j=>`<div><strong>${esc(j.title)}</strong><span>${esc(j.company)}</span><span class="muted">${esc(j.location)}</span><span class="why">${esc(j.excluded)}</span><a class="link" href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">Posting ↗</a></div>`).join("");
+  }
+
+  $("#fitChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const f=b.dataset.fit;st.fit.has(f)?st.fit.delete(f):st.fit.add(f);if(!st.fit.size)st.fit.add(f);save();syncControls();render()});
+  [["city","city"],["posted","posted"],["added","added"],["statusF","status"],["sort","sort"]].forEach(([id,k])=>$("#"+id).addEventListener("change",e=>{st[k]=e.target.value;save();render()}));
+  $("#reset").addEventListener("click",()=>{Object.assign(st,{fit:new Set(["high","medium","low"]),city:"",posted:"",added:"",status:"",sort:"fit"});save();syncControls();render()});
+  $("#rows").addEventListener("change",async e=>{
+    const sel=e.target.closest("select.status");if(!sel||!db)return;
+    const id=sel.dataset.id, v=sel.value, j=jobs.find(x=>x.id===id), prev=j&&(j.status||"new");
+    sel.dataset.v=v; if(j)j.status=v;
+    try{await db.doc("jobs/"+id).update({status:v,status_updated:new Date().toISOString().slice(0,10)});toast("Status saved")}
+    catch(err){if(j)j.status=prev;sel.value=prev;sel.dataset.v=prev;toast(err&&err.code==="not_granted"?"You can view this board but not change statuses.":"Couldn't save the status. Check your connection and try again.")}
+  });
+
+  syncControls();render();
+  (async()=>{
+    try{db=await window.claude?.use?.("db")}catch(e){db=null}
+    try{const u=await window.claude?.use?.("user");if(u){const w=await u.can("data.write");if(w===false)canWrite=false}}catch(e){}
+    if(!db){render();return}
+    db.collection("jobs").onSnapshot(snap=>{jobs=snap.docs.map(d=>({id:d.id,...d.data()}));syncControls();render()},
+      err=>{$("#rows").innerHTML=`<tr><td colspan="10" class="empty">Couldn't load jobs (${esc(err.message||err.code)}). Reload the page to try again.</td></tr>`});
+  })();
+})();
+</script>
